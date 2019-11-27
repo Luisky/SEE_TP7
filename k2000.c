@@ -82,14 +82,6 @@ int main(int argc, char **argv)
 
 	// Timings in delay_off & delay_on are expressed in milliseconds
 	// usleep is in microsecond so : * 1000
-	/*trigger_timer(LED_FILE(LED1, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED2, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED3, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED4, TRIGGER));*/
-
 	while (true) {
 		turn_backlight(LED_FILE(LED2, BACKLIGHT), true);
 		turn_backlight(LED_FILE(LED1, BACKLIGHT), false);

@@ -86,7 +86,7 @@ void int_to_led(int nb)
 
 int main(void)
 {
-	puts("counter program");
+	printf("counter program pid : %d\n", getpid());
 
 	struct sigaction sa;
 	sa.sa_flags	= SA_SIGINFO;
