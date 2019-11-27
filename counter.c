@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+#include <signal.h>
 
 #define perr_exit(msg)                                                         \
 	do {                                                                   \
@@ -31,19 +32,14 @@
 
 #define LED_FILE(LED, FILE) LED FILE
 
-void trigger_timer(char *filename)
+void int_to_led(int nb);
+
+static void handler(int sig, siginfo_t *si, void *uc)
 {
-	int fd;
+	static int count = 0;
 
-	if ((fd = open(filename, O_WRONLY)) == -1)
-		perr_exit("open");
-
-	// sizeof(TIMER) will return 6 for write
-	if (write(fd, TIMER, sizeof(TIMER)) != sizeof(TIMER))
-		perr_exit("write");
-
-	if (close(fd) == -1)
-		perr_exit("close");
+	count++;
+	int_to_led(count);
 }
 
 void turn_backlight(char *filename, bool state)
@@ -65,48 +61,47 @@ void turn_backlight(char *filename, bool state)
 		perr_exit("close");
 }
 
-int main(int argc, char **argv)
+void int_to_led(int nb)
 {
-	int fd;
-	int speed;
-
-	if (argc != 2)
-		errx(EXIT_FAILURE, "%s [speed in ms (1 to 999)]\n", argv[0]);
-
-	speed = atoi(argv[1]);
-	if ((speed > 999) || (speed < 1))
-		errx(EXIT_FAILURE, "Please give a speed between 1 and 999");
+	if (nb % 2 == 0)
+		turn_backlight(LED_FILE(LED1, BACKLIGHT), false);
 	else
-		printf("speed chosen : %d\n", speed);
-	speed *= 1000;
+		turn_backlight(LED_FILE(LED1, BACKLIGHT), true);
 
-	// Timings in delay_off & delay_on are expressed in milliseconds
-	// usleep is in microsecond so : * 1000
-	/*trigger_timer(LED_FILE(LED1, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED2, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED3, TRIGGER));
-	usleep(speed);
-	trigger_timer(LED_FILE(LED4, TRIGGER));*/
+	if ((nb >> 1) % 2 == 0)
+		turn_backlight(LED_FILE(LED2, BACKLIGHT), false);
+	else
+		turn_backlight(LED_FILE(LED2, BACKLIGHT), true);
+
+	if ((nb >> 2) % 2 == 0)
+		turn_backlight(LED_FILE(LED3, BACKLIGHT), false);
+	else
+		turn_backlight(LED_FILE(LED3, BACKLIGHT), true);
+
+	if ((nb >> 3) % 2 == 0)
+		turn_backlight(LED_FILE(LED4, BACKLIGHT), false);
+	else
+		turn_backlight(LED_FILE(LED4, BACKLIGHT), true);
+}
+
+int main(void)
+{
+	puts("counter program");
+
+	struct sigaction sa;
+	sa.sa_flags	= SA_SIGINFO;
+	sa.sa_sigaction = handler;
+	sigemptyset(&sa.sa_mask);
+	if (sigaction(SIGUSR1, &sa, NULL) == -1)
+		perr_exit("sigaction");
+
+	turn_backlight(LED_FILE(LED1, BACKLIGHT), false);
+	turn_backlight(LED_FILE(LED2, BACKLIGHT), false);
+	turn_backlight(LED_FILE(LED3, BACKLIGHT), false);
+	turn_backlight(LED_FILE(LED4, BACKLIGHT), false);
 
 	while (true) {
-		turn_backlight(LED_FILE(LED1, BACKLIGHT), true);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED2, BACKLIGHT), true);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED3, BACKLIGHT), true);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED4, BACKLIGHT), true);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED4, BACKLIGHT), false);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED3, BACKLIGHT), false);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED2, BACKLIGHT), false);
-		usleep(speed);
-		turn_backlight(LED_FILE(LED1, BACKLIGHT), false);
-		usleep(speed);
+		// do nothing
 	}
 
 	return EXIT_SUCCESS;

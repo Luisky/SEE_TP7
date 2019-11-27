@@ -10,8 +10,10 @@ GCC_CROSS := $(BR_OUTPUT)host/usr/bin/arm-linux-gnueabihf-gcc
 # with a working directory of the directory containing the kernel
 # source and compile only the modules in the PWD (local) directory.
 default:
-	$(GCC_CROSS) -o K2000_bbb main.c
+	$(GCC_CROSS) -o K2000 k2000.c
+	$(GCC_CROSS) -o counter counter.c
+	$(GCC_CROSS) -o gensig gensig.c
 
 .PHONY: clean
 clean:
-	$(RM) -r	K2000_bbb
+	$(RM) -r	K2000 counter gensig
