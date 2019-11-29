@@ -21,6 +21,11 @@
 #define LED3 "/sys/class/leds/beaglebone:green:usr2"
 #define LED4 "/sys/class/leds/beaglebone:green:usr3"
 
+#define LED1_MASK 0b0001
+#define LED2_MASK 0b0010
+#define LED3_MASK 0b0100
+#define LED4_MASK 0b1000
+
 #define TRIGGER "/trigger"
 #define BACKLIGHT "/brightness" //typo sorry
 #define DEL_ON "/delay_on"
@@ -63,25 +68,10 @@ void turn_backlight(char *filename, bool state)
 
 void int_to_led(int nb)
 {
-	if (nb % 2 == 0)
-		turn_backlight(LED_FILE(LED1, BACKLIGHT), false);
-	else
-		turn_backlight(LED_FILE(LED1, BACKLIGHT), true);
-
-	if ((nb >> 1) % 2 == 0)
-		turn_backlight(LED_FILE(LED2, BACKLIGHT), false);
-	else
-		turn_backlight(LED_FILE(LED2, BACKLIGHT), true);
-
-	if ((nb >> 2) % 2 == 0)
-		turn_backlight(LED_FILE(LED3, BACKLIGHT), false);
-	else
-		turn_backlight(LED_FILE(LED3, BACKLIGHT), true);
-
-	if ((nb >> 3) % 2 == 0)
-		turn_backlight(LED_FILE(LED4, BACKLIGHT), false);
-	else
-		turn_backlight(LED_FILE(LED4, BACKLIGHT), true);
+	turn_backlight(LED_FILE(LED1, BACKLIGHT), nb & LED1_MASK);
+	turn_backlight(LED_FILE(LED2, BACKLIGHT), nb & LED2_MASK);
+	turn_backlight(LED_FILE(LED3, BACKLIGHT), nb & LED3_MASK);
+	turn_backlight(LED_FILE(LED4, BACKLIGHT), nb & LED4_MASK);
 }
 
 int main(void)
