@@ -91,7 +91,10 @@ int main(void)
 	turn_backlight(LED_FILE(LED4, BACKLIGHT), false);
 
 	while (true) {
-		// do nothing
+		/*The pause() function shall suspend the calling thread until delivery  of  a
+       	signal  whose  action is either to execute a signal-catching function or to
+       	terminate the process.*/
+		pause();
 	}
 
 	return EXIT_SUCCESS;
